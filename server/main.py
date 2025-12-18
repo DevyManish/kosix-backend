@@ -1,5 +1,9 @@
 from fastapi import FastAPI
 from datetime import datetime
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = FastAPI()
 
@@ -21,4 +25,6 @@ async def health_check():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    host = os.getenv("SERVER_HOST", "localhost")
+    port = int(os.getenv("SERVER_PORT", "8080"))
+    uvicorn.run(app, host=host, port=port, reload=True)
