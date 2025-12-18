@@ -27,4 +27,4 @@ if __name__ == "__main__":
     import uvicorn
     host = os.getenv("SERVER_HOST", "localhost")
     port = int(os.getenv("SERVER_PORT", "8080"))
-    uvicorn.run(app, host=host, port=port, reload=True)
+    uvicorn.run("main:app", host=host, port=port, reload=True)
