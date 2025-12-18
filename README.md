@@ -91,5 +91,3 @@ uv run adk [args...]
 [![Contributors](https://contrib.rocks/image?repo=DevyManish/kosix-backend)](https://github.com/DevyManish/kosix-backend/graphs/contributors)
 
 ---
-
-Thank you for choosing Kosix! Empower your team with AI-driven analytics and make data accessible to everyone.
