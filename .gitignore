@@ -11,3 +11,6 @@ wheels/
 
 # credentials
 .env
+
+# ADK-generated files
+.adk

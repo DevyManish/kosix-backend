@@ -72,6 +72,12 @@ uv sync
 
 You can run the server and ADK commands manually by navigating to their respective directories.
 
+**To run ADK:**
+
+```bash
+uv run adk [args...]
+```
+
 **To run the Server:**
 
 ```bash
@@ -79,12 +85,6 @@ cd server
 uv run python main.py
 ```
 
-**To run ADK:**
-
-```bash
-cd agents
-uv run adk [args...]
-```
 
 ### Contributors
 
