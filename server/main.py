@@ -1,11 +1,13 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, APIRouter
 from datetime import datetime
 import os
 from dotenv import load_dotenv
 
 load_dotenv()
 
-app = FastAPI()
+app = FastAPI(root_path="/api/v1")
+
+api_router = APIRouter()
 
 @app.get("/health")
 async def health_check():
@@ -22,6 +24,8 @@ async def health_check():
         "timestamp": datetime.now().isoformat() + "Z",
         "responseTimeMs": 29
     }
+
+app.include_router(api_router)
 
 if __name__ == "__main__":
     import uvicorn
