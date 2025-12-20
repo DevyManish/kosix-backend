@@ -1,0 +1,199 @@
+datasource db {
+  provider = "postgres"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-py"
+  recursive_type_depth = 5
+  interface = "sync"
+}
+
+////////////////////
+// ENUMS
+////////////////////
+
+enum UserRole {
+  ADMIN
+  USER
+}
+
+enum DataSourceType {
+  POSTGRES
+  MYSQL
+  SNOWFLAKE
+  DUCKDB
+  FILE
+}
+
+enum ConversationStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+enum MessageRole {
+  USER
+  ASSISTANT
+  SYSTEM
+}
+
+enum ArtifactType {
+  CHART
+  REPORT
+  EXPORT
+}
+
+////////////////////
+// ORGANIZATION
+////////////////////
+
+model Organization {
+  id            String        @id @default(uuid())
+  name          String
+  createdAt     DateTime      @default(now())
+
+  users         User[]
+  dataSources   DataSource[]
+  conversations Conversation[]
+  files         File[]
+  artifacts     Artifact[]
+}
+
+////////////////////
+// USER
+////////////////////
+
+model User {
+  id             String        @id @default(uuid())
+  email          String        @unique
+  name           String?
+  role           UserRole      @default(USER)
+
+  organizationId String
+  organization   Organization  @relation(fields: [organizationId], references: [id])
+
+  conversations  Conversation[]
+  files          File[]
+  createdAt      DateTime      @default(now())
+}
+
+////////////////////
+// CONVERSATIONS
+////////////////////
+
+model Conversation {
+  id             String              @id @default(uuid())
+  title          String?
+  status         ConversationStatus  @default(ACTIVE)
+
+  userId         String
+  user           User                @relation(fields: [userId], references: [id])
+
+  organizationId String
+  organization   Organization        @relation(fields: [organizationId], references: [id])
+
+  messages       Message[]
+  artifacts      Artifact[]
+
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+}
+
+model Message {
+  id              String       @id @default(uuid())
+  role            MessageRole
+  content         Json
+
+  conversationId  String
+  conversation    Conversation @relation(fields: [conversationId], references: [id])
+
+  createdAt       DateTime     @default(now())
+}
+
+////////////////////
+// DATA SOURCES
+////////////////////
+
+model DataSource {
+  id              String         @id @default(uuid())
+  name            String
+  type            DataSourceType
+
+  organizationId  String
+  organization    Organization   @relation(fields: [organizationId], references: [id])
+
+  // Secure connection info (encrypted at app layer)
+  connectionUri   String?
+  options         Json?
+
+  // Cached schema metadata
+  schemaMetadata  Json?
+  lastIntrospectedAt DateTime?
+
+  isActive        Boolean        @default(true)
+
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+}
+
+////////////////////
+// FILES (Uploads)
+////////////////////
+
+model File {
+  id              String        @id @default(uuid())
+  filename        String
+  mimeType        String
+  size            Int
+
+  storagePath     String        // S3 / GCS / local path
+  checksum        String        // used for caching & dedupe
+
+  organizationId  String
+  organization    Organization  @relation(fields: [organizationId], references: [id])
+
+  uploadedById    String
+  uploadedBy      User          @relation(fields: [uploadedById], references: [id])
+
+  // Parsed schema (DuckDB / Pandas)
+  parsedSchema    Json?
+  parsedAt        DateTime?
+
+  createdAt       DateTime      @default(now())
+}
+
+////////////////////
+// ARTIFACTS (Charts, Reports)
+////////////////////
+
+model Artifact {
+  id              String        @id @default(uuid())
+  type            ArtifactType
+  name            String?
+
+  organizationId  String
+  organization    Organization  @relation(fields: [organizationId], references: [id])
+
+  conversationId  String?
+  conversation    Conversation? @relation(fields: [conversationId], references: [id])
+
+  storagePath     String
+  metadata        Json?
+
+  createdAt       DateTime      @default(now())
+}
+
+////////////////////
+// OPTIONAL: AGENT TRACE (ADVANCED)
+////////////////////
+
+model AgentTrace {
+  id              String    @id @default(uuid())
+  agentName       String
+  input           Json
+  output          Json
+  durationMs      Int
+
+  conversationId  String?
+  createdAt       DateTime  @default(now())
+}
