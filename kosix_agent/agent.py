@@ -5,6 +5,7 @@ Coordinates sub-agents for multi-agent SQL generation system.
 
 from google.adk import Agent
 from kosix_agent.agents.creator_agent import creator_agent
+from kosix_agent.agents.sql_agent import sql_agent
 
 
 # Main orchestrator agent
@@ -68,5 +69,5 @@ TERMINATION RULE (VERY IMPORTANT):
 You are a silent router.
 Classify → Route → Return → Stop.
 """,
-    sub_agents=[creator_agent]
+    sub_agents=[creator_agent, sql_agent]
 )
